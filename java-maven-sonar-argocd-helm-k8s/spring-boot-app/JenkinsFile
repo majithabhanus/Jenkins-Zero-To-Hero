@@ -12,13 +12,18 @@ pipeline {
         //git branch: 'main', url: 'https://github.com/iam-veeramalla/Jenkins-Zero-To-Hero.git'
       }
     }
-    stage('Build and Test') {
-      steps {
+   stage('Build and Test') {
+    steps {
+        // List files for debugging
         sh 'ls -ltr'
-        // build the project and create a JAR file
-        sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn clean package'
-      }
+
+        // Run Maven build and skip Sonar analysis temporarily
+        dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
+            sh 'mvn clean package -Dsonar.skip=true'
+        }
     }
+}
+
     stage('Static Code Analysis') {
       environment {
         SONAR_URL = "http://34.201.116.83:9000"
