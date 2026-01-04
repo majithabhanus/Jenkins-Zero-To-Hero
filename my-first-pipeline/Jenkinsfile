@@ -1,21 +1,21 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:16-alpine'
-        }
-    }
+    agent none
 
     stages {
-        stage('Test') {
+        stage('Docker on Host') {
+            agent any
             steps {
-                sh 'node --version'
+                sh 'docker ps'
             }
         }
-
-        stage('Docker Permission Test') {
+        stage('Node Test in Container') {
+            agent {
+                docker {
+                    image 'node:16-alpine'
+                }
+            }
             steps {
-                sh 'whoami'
-                sh 'docker ps'
+                sh 'node --version'
             }
         }
     }
