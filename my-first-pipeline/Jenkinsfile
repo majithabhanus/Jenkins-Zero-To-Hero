@@ -9,4 +9,11 @@ pipeline {
       }
     }
   }
+  stage('Docker Permission Test') {
+    steps {
+        sh 'whoami'
+        sh 'docker ps'
+    }
+}
+
 }
