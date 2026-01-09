@@ -63,15 +63,13 @@ pipeline {
 
     stage('Update Deployment File') {
   steps {
-    checkout scm   // THIS IS REQUIRED
+      withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+        sh '''
+          git config user.name "majithabhanus"
+          git config user.email "majithabhanus@gmail.com"
 
-    withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-      sh '''
-        git config user.name "majithabhanus"
-        git config user.email "majithabhanus@gmail.com"
-
-        git status
-      '''
+         git status
+       '''
       }
      }
    }
