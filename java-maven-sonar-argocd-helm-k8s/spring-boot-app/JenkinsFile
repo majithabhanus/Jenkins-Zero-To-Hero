@@ -67,9 +67,12 @@ pipeline {
             GIT_USER_NAME = "majithabhanus"
         }
        steps {
+             checkout scm
+             git branch: 'main',
+            dir(env.WORKSPACE) {
             withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                 sh '''
-                    checkout scm
+                    
                     pwd
                     ls -la
                    
@@ -81,7 +84,8 @@ pipeline {
                     git commit -m "Update deployment image to version ${BUILD_NUMBER}"
                     git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
                 '''
-      }
+         }
+       }
      }
    }
  }
