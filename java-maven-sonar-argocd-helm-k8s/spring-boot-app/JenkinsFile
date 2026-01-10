@@ -68,7 +68,6 @@ pipeline {
         }
        steps {
              checkout scm
-             git branch: 'main',
             dir(env.WORKSPACE) {
             withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                 sh '''
