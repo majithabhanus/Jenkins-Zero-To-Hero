@@ -71,8 +71,7 @@ pipeline {
                 sh '''
                     pwd
                     ls -la
-                    ls -la .git
-
+                   
                     git config user.email "majithabhanus@gmail.com"
                     git config user.name "majithabhanus"
                     BUILD_NUMBER=${BUILD_NUMBER}
