@@ -10,8 +10,8 @@ pipeline {
     stage('Checkout') {
       steps {
         echo "Checkout stage passed"
-         git branch: 'main', 
-            url: 'https://github.com/majithabhanus/Jenkins-Zero-To-Hero.git'
+          // git branch: 'main', 
+           //   url: 'https://github.com/majithabhanus/Jenkins-Zero-To-Hero.git'
       }
     }
 
@@ -69,6 +69,7 @@ pipeline {
        steps {
             withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                 sh '''
+                    checkout scm
                     pwd
                     ls -la
                    
