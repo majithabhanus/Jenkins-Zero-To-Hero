@@ -2,9 +2,8 @@ pipeline {
   agent any
 
   environment {
-    APP_DIR    = "java-maven-sonar-argocd-helm-k8s/spring-boot-app"
-    IMAGE_NAME = "majithas/jenkins"
-    SONAR_URL  = "http://34.201.205.166:9000"
+    APP_DIR = "java-maven-sonar-argocd-helm-k8s/spring-boot-app"
+    IMAGE   = "majithas/jenkins"
   }
 
   stages {
@@ -16,48 +15,19 @@ pipeline {
       }
     }
 
-    stage('Build JAR') {
-      agent {
-        docker {
-          image 'maven:3.9.6-eclipse-temurin-17'
-          args '--user root'
-        }
-      }
+    stage('Build JAR (HOST)') {
       steps {
         dir("${APP_DIR}") {
           sh '''
             mvn clean package -DskipTests
-            echo "JAR FILES:"
+            echo "✅ JAR CREATED:"
             ls -ltr target
           '''
         }
       }
     }
 
-    stage('Static Code Analysis') {
-      agent {
-        docker {
-          image 'maven:3.9.6-eclipse-temurin-17'
-          args '--user root'
-        }
-      }
-      steps {
-        dir("${APP_DIR}") {
-          withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
-            sh """
-              mvn sonar:sonar \
-              -Dsonar.login=$SONAR_AUTH_TOKEN \
-              -Dsonar.host.url=$SONAR_URL
-            """
-          }
-        }
-      }
-    }
-
     stage('Build & Push Docker Image') {
-      environment {
-        IMAGE_TAG = "${BUILD_NUMBER}"
-      }
       steps {
         dir("${APP_DIR}") {
           withCredentials([usernamePassword(
@@ -66,40 +36,11 @@ pipeline {
             passwordVariable: 'DOCKER_PASS'
           )]) {
             sh '''
-              echo "PWD:"
-              pwd
-
-              echo "FILES:"
-              ls -ltr
-
-              echo "TARGET CONTENT:"
-              ls -ltr target
-
-              docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-
-              echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
-
-              docker push ${IMAGE_NAME}:${IMAGE_TAG}
+              docker build -t ${IMAGE}:${BUILD_NUMBER} .
+              echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+              docker push ${IMAGE}:${BUILD_NUMBER}
             '''
           }
-        }
-      }
-    }
-
-    stage('Update Deployment File') {
-      steps {
-        withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-          sh """
-            git config user.email "majithabhanus@gmail.com"
-            git config user.name "majithabhanus"
-
-            sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" \
-              java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
-
-            git add java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
-            git commit -m "Update image tag to ${BUILD_NUMBER}" || true
-            git push https://${GITHUB_TOKEN}@github.com/majithabhanus/Jenkins-Zero-To-Hero.git main
-          """
         }
       }
     }
