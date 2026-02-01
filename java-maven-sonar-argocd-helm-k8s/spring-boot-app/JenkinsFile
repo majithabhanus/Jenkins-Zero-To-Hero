@@ -65,6 +65,14 @@ pipeline {
             passwordVariable: 'DOCKER_PASS'
           )]) {
             sh '''
+               echo "PWD:"
+                       pwd
+               echo "FILES:"
+                   ls -ltr
+               echo "TARGET:"
+                   ls -ltr target || echo "❌ target folder missing"
+                 '''
+
               docker build -t $IMAGE_NAME:$IMAGE_TAG .
               echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
               docker push $IMAGE_NAME:$IMAGE_TAG
