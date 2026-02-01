@@ -27,7 +27,8 @@ pipeline {
         dir("${APP_DIR}") {
           sh '''
             mvn clean package -DskipTests
-            ls -l target
+            echo "JAR FILES:"
+            ls -ltr target
           '''
         }
       }
@@ -65,17 +66,20 @@ pipeline {
             passwordVariable: 'DOCKER_PASS'
           )]) {
             sh '''
-               echo "PWD:"
-                       pwd
-               echo "FILES:"
-                   ls -ltr
-               echo "TARGET:"
-                   ls -ltr target || echo "❌ target folder missing"
-                 '''
+              echo "PWD:"
+              pwd
 
-              docker build -t $IMAGE_NAME:$IMAGE_TAG .
-              echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-              docker push $IMAGE_NAME:$IMAGE_TAG
+              echo "FILES:"
+              ls -ltr
+
+              echo "TARGET CONTENT:"
+              ls -ltr target
+
+              docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+
+              echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
+
+              docker push ${IMAGE_NAME}:${IMAGE_TAG}
             '''
           }
         }
